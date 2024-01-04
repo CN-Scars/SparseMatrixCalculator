@@ -46,9 +46,6 @@ void Widget::on_readA_Button_clicked()
     ui->status_label->setText("正在加载矩阵A...");
     matrixA.loadFromFile(fileName);
 
-    // 隐藏进度条
-    // ui->progressBar->setVisible(false);
-
     ui->matrixA_textBrowser->clear();
     QVector<QVector<double>> matrix = matrixA.getMatrix();
 
@@ -77,7 +74,7 @@ void Widget::on_readA_Button_clicked()
     ui->status_label->setText("加载矩阵A成功！");
 
     // 输出矩阵A
-    qDebug() << "矩阵A：\n" << matrixA;
+    // qDebug() << "矩阵A：\n" << matrixA;
 }
 
 void Widget::on_clearA_Button_clicked()
@@ -128,14 +125,11 @@ void Widget::on_readB_Button_clicked()
         ui->progressBar->setValue(rowIndex + 1);
     }
 
-    // 隐藏进度条
-    // ui->progressBar->setVisible(false);
-
     updateExecuteButtonState(ui->operationMode_comboBox->currentIndex());
     ui->status_label->setText("加载矩阵B成功！");
 
     // 输出矩阵B
-    qDebug() << "矩阵B：\n" << matrixB;
+    // qDebug() << "矩阵B：\n" << matrixB;
 }
 
 void Widget::on_clearB_Button_clicked()
@@ -205,7 +199,7 @@ void Widget::on_execute_Button_clicked()
     ui->status_label->setText("计算完成！");
 
     // 输出结果
-    qDebug() << "计算结果：\n" << result;
+    // qDebug() << "计算结果：\n" << result;
 }
 
 void Widget::showResult(const Matrix &matrix)
@@ -224,7 +218,7 @@ void Widget::showResult(const Matrix &matrix)
         ui->result_textBrowser->append(line);
     }
 
-    qDebug() << "计算结果：\n" << matrix;
+    // qDebug() << "计算结果：\n" << matrix;
 }
 
 void Widget::on_save_Button_clicked()
