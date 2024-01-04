@@ -14,6 +14,7 @@ Widget::Widget(QWidget *parent)
     ui->matrixA_textBrowser->setWordWrapMode(QTextOption::NoWrap);  // 设置文本不自动换行
     ui->matrixB_textBrowser->setWordWrapMode(QTextOption::NoWrap);  // 设置文本不自动换行
     ui->result_textBrowser->setWordWrapMode(QTextOption::NoWrap);   // 设置文本不自动换行
+    ui->progressBar->setValue(0);
 
     connect(ui->operationMode_comboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(updateExecuteButtonState(int)));
 }
@@ -37,12 +38,28 @@ void Widget::on_readA_Button_clicked()
         return;
     }
 
+    // 显示进度条并设置初始值
+    ui->progressBar->setMinimum(0);
+    ui->progressBar->setMaximum(0); // 当最大值设置为0时，进度条显示为不确定模式
+    ui->progressBar->setVisible(true);
+
     ui->status_label->setText("正在加载矩阵A...");
     matrixA.loadFromFile(fileName);
+
+    // 隐藏进度条
+    // ui->progressBar->setVisible(false);
+
     ui->matrixA_textBrowser->clear();
     QVector<QVector<double>> matrix = matrixA.getMatrix();
-    for (const QVector<double> &row : matrix)
+
+    // 设置进度条的最大值
+    ui->progressBar->setMaximum(matrix.size());
+    ui->progressBar->setValue(0); // 初始进度设置为0
+    ui->progressBar->setVisible(true);
+
+    for (int rowIndex = 0; rowIndex < matrix.size(); ++rowIndex)
     {
+        const QVector<double> &row = matrix[rowIndex];
         QString line;
         for (int i = 0; i < row.size(); ++i)
         {
@@ -51,6 +68,9 @@ void Widget::on_readA_Button_clicked()
             line += paddedNumber;
         }
         ui->matrixA_textBrowser->append(line);
+
+        // 更新进度条的当前值
+        ui->progressBar->setValue(rowIndex + 1);
     }
 
     updateExecuteButtonState(ui->operationMode_comboBox->currentIndex());
@@ -69,7 +89,6 @@ void Widget::on_clearA_Button_clicked()
     updateExecuteButtonState(ui->operationMode_comboBox->currentIndex());
     ui->status_label->setText("清除矩阵A成功！");
 }
-
 void Widget::on_readB_Button_clicked()
 {
     QString fileName = QFileDialog::getOpenFileName(this, tr("打开矩阵文件"), ".", tr("文本文件(*.txt)"));
@@ -78,12 +97,24 @@ void Widget::on_readB_Button_clicked()
         return;
     }
 
+    // 显示进度条并设置初始值
+    ui->progressBar->setMinimum(0);
+    ui->progressBar->setMaximum(0); // 进度条显示为不确定模式
+    ui->progressBar->setVisible(true);
+
     ui->status_label->setText("正在加载矩阵B...");
     matrixB.loadFromFile(fileName);
+
     ui->matrixB_textBrowser->clear();
     QVector<QVector<double>> matrix = matrixB.getMatrix();
-    for (const QVector<double> &row : matrix)
+
+    // 设置进度条的最大值
+    ui->progressBar->setMaximum(matrix.size());
+    ui->progressBar->setValue(0); // 初始进度设置为0
+
+    for (int rowIndex = 0; rowIndex < matrix.size(); ++rowIndex)
     {
+        const QVector<double> &row = matrix[rowIndex];
         QString line;
         for (int i = 0; i < row.size(); ++i)
         {
@@ -92,7 +123,13 @@ void Widget::on_readB_Button_clicked()
             line += paddedNumber;
         }
         ui->matrixB_textBrowser->append(line);
+
+        // 更新进度条的当前值
+        ui->progressBar->setValue(rowIndex + 1);
     }
+
+    // 隐藏进度条
+    // ui->progressBar->setVisible(false);
 
     updateExecuteButtonState(ui->operationMode_comboBox->currentIndex());
     ui->status_label->setText("加载矩阵B成功！");
@@ -113,8 +150,14 @@ void Widget::on_clearB_Button_clicked()
 
 void Widget::on_execute_Button_clicked()
 {
+    ui->status_label->setText("正在计算...");
+
     // 根据操作模式进行运算
     int index = ui->operationMode_comboBox->currentIndex();
+
+    // 初始化进度条
+    ui->progressBar->setMaximum(100);
+    ui->progressBar->setValue(0);
 
     switch (index)
     {
@@ -148,9 +191,21 @@ void Widget::on_execute_Button_clicked()
     default:
         break;
     }
+
+    // 显示结果
     showResult(result);
+
+    // 更新进度条为100%并隐藏
+    ui->progressBar->setValue(100);
+
+    // 允许保存操作
     ui->save_Button->setEnabled(true);
+
+    // 更新状态栏
     ui->status_label->setText("计算完成！");
+
+    // 输出结果
+    qDebug() << "计算结果：\n" << result;
 }
 
 void Widget::showResult(const Matrix &matrix)
@@ -176,19 +231,28 @@ void Widget::on_save_Button_clicked()
 {
     // 把result矩阵保存到txt中
     QString fileName = QFileDialog::getSaveFileName(this, tr("保存结果"), ".", tr("文本文件(*.txt)"));
-    if (fileName.isEmpty())
-    {
+    if (fileName.isEmpty()) {
         return;
     }
+
     QFile file(fileName);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
     {
         return;
     }
+
     QTextStream out(&file);
     QVector<QVector<double>> m = result.getMatrix();
-    for (const QVector<double> &row : m)
+
+    // 显示进度条并设置初始值和最大值
+    ui->progressBar->setVisible(true);
+    ui->progressBar->setMinimum(0);
+    ui->progressBar->setMaximum(m.size());
+
+    for (int rowIndex = 0; rowIndex < m.size(); ++rowIndex)
     {
+        const QVector<double> &row = m[rowIndex];
+
         for (int i = 0; i < row.size(); ++i)
         {
             QString number = QString::number(row[i], 'f', 10); // 格式化为10位小数
@@ -201,8 +265,13 @@ void Widget::on_save_Button_clicked()
             out << paddedNumber;
         }
         out << "\n";
+
+        // 更新进度条的当前值
+        ui->progressBar->setValue(rowIndex + 1);
     }
+
     file.close();
+
     ui->status_label->setText("保存结果成功！");
 }
 
