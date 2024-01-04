@@ -36,11 +36,13 @@ function matrix_generator()
     mkdir('large_sparse_matrices');
     
     % 生成测试数据
-    generate_zero_matrices();
-    generate_dense_matrices(10, 10); % 例如 10x10 的稠密矩阵
-    generate_sparse_matrices(10, 10, 0.1); % 例如 10x10 的稀疏矩阵，稀疏度为0.1
-    generate_dense_matrices(1000, 1000); % 超大的稠密矩阵
-    generate_sparse_matrices(1000, 1000, 0.001); % 超大的稀疏矩阵
+    generate_zero_matrices();   % 零矩阵
+    generate_dense_matrices(10, 10); % 10x10 的稠密矩阵
+    generate_sparse_matrices(10, 10, 0.1); % 10x10 的稀疏矩阵，稀疏度为0.1
+    generate_large_dense_matrices(1000, 1000); % 超大的稠密矩阵
+    generate_large_sparse_matrices(1000, 1000, 0.001); % 超大的稀疏矩阵
+
+    disp('所有测试矩阵已成功生成并保存。');
 end
 
 function generate_zero_matrices()
@@ -62,6 +64,20 @@ function generate_sparse_matrices(rows, cols, density)
     B = sprand(rows, cols, density);
     save_full_matrix_to_txt(A, 'sparse_matrices/matrixA.txt');
     save_full_matrix_to_txt(B, 'sparse_matrices/matrixB.txt');
+end
+
+function generate_large_dense_matrices(rows, cols)
+    A = rand(rows, cols);
+    B = rand(rows, cols);
+    save_full_matrix_to_txt(A, 'large_dense_matrices/matrixA.txt');
+    save_full_matrix_to_txt(B, 'large_dense_matrices/matrixB.txt');
+end
+
+function generate_large_sparse_matrices(rows, cols, density)
+    A = sprand(rows, cols, density);
+    B = sprand(rows, cols, density);
+    save_full_matrix_to_txt(A, 'large_sparse_matrices/matrixA.txt');
+    save_full_matrix_to_txt(B, 'large_sparse_matrices/matrixB.txt');
 end
 
 function save_full_matrix_to_txt(matrix, filename)
