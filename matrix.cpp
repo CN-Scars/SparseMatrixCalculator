@@ -50,7 +50,8 @@ Matrix Matrix::operator+(const Matrix &rhs) const   // 采用三元组进行稀�
                 t.row = tripleA[i].row;
                 t.column = tripleA[i].column;
                 t.value = tripleA[i].value + tripleB[j].value;
-                tripleC.append(t);
+                if (t.value != 0)
+                    tripleC.append(t);
                 ++i;
                 ++j;
             }
@@ -66,7 +67,18 @@ Matrix Matrix::operator+(const Matrix &rhs) const   // 采用三元组进行稀�
     }
 
     Matrix result;
-    result.matrix = getMatrixFromTriple(tripleC);
+    int row = 0, column = 0;
+    for (const auto &t : tripleC)
+    {
+        if (t.row > row)
+            row = t.row;
+        if (t.column > column)
+            column = t.column;
+    }
+    ++row;
+    ++column;
+
+    result.matrix = getMatrixFromTriple(tripleC, row, column);
     return result;
 }
 
@@ -82,7 +94,17 @@ Matrix Matrix::operator-(const Matrix &rhs) const
 
     // 创建一个新的 Matrix 实例来调用加法运算符
     Matrix negatedMatrix;
-    negatedMatrix.matrix = getMatrixFromTriple(negatedTripleB);
+    int row = 0, column = 0;
+    for (const auto &t : negatedTripleB)
+    {
+        if (t.row > row)
+            row = t.row;
+        if (t.column > column)
+            column = t.column;
+    }
+    ++row;
+    ++column;
+    negatedMatrix.matrix = getMatrixFromTriple(negatedTripleB, row, column);
 
     // 使用加法运算符来实现减法
     return *this + negatedMatrix;
@@ -115,12 +137,25 @@ Matrix Matrix::operator*(const Matrix &rhs) const
             t.row = it.key().first;
             t.column = it.key().second;
             t.value = it.value();
-            tripleC.append(t);
+            if (t.value != 0)
+                tripleC.append(t);
         }
     }
 
+    // 获取结果矩阵的行数和列数
+    int row = 0, column = 0;
+    for (const auto &t : tripleC)
+    {
+        if (t.row > row)
+            row = t.row;
+        if (t.column > column)
+            column = t.column;
+    }
+    ++row;
+    ++column;
+
     Matrix result;
-    result.matrix = getMatrixFromTriple(tripleC);
+    result.matrix = getMatrixFromTriple(tripleC, row, column);
     return result;
 }
 
@@ -153,12 +188,13 @@ void Matrix::loadFromFile(const QString &fileName)
     QTextStream in(&file);
     while (!in.atEnd())
     {
-        QString line = in.readLine();
+        QString line = in.readLine().trimmed(); // 去除首尾空格
         QStringList list = line.split(" ");
         QVector<double> row;
         for (const QString &str : list)
         {
-            row.append(str.toInt());
+            if (!str.isEmpty())
+                row.append(str.toDouble());
         }
         matrix.append(row);
     }
@@ -179,7 +215,8 @@ QVector<Triple> Matrix::toTriple() const
                 t.row = i;
                 t.column = j;
                 t.value = matrix[i][j];
-                triple.append(t);
+                if (t.value != 0)
+                    triple.append(t);
             }
         }
     }
@@ -191,23 +228,18 @@ QVector<QVector<double> > Matrix::getMatrix() const
     return matrix;
 }
 
-QVector<QVector<double>> Matrix::getMatrixFromTriple(const QVector<Triple> &triple) const
+QVector<QVector<double>> Matrix::getMatrixFromTriple(const QVector<Triple> &triple, const int &rows, const int &columns) const
 {
-    QVector<QVector<double>> matrix;
+    QVector<QVector<double>> matrix(rows, QVector<double>(columns, 0)); // 初始化为全零矩阵
+
     for (const Triple &t : triple)
     {
-        if (matrix.size() < t.row + 1)
-        {
-            matrix.resize(t.row + 1);
-        }
-        if (matrix[t.row].size() < t.column + 1)
-        {
-            matrix[t.row].resize(t.column + 1, 0);
-        }
         matrix[t.row][t.column] = t.value;
     }
+
     return matrix;
 }
+
 
 void Matrix::clear()
 {

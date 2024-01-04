@@ -11,6 +11,9 @@ Widget::Widget(QWidget *parent)
 
     ui->execute_Button->setEnabled(false);
     ui->save_Button->setEnabled(false);
+    ui->matrixA_textBrowser->setWordWrapMode(QTextOption::NoWrap);  // 设置文本不自动换行
+    ui->matrixB_textBrowser->setWordWrapMode(QTextOption::NoWrap);  // 设置文本不自动换行
+    ui->result_textBrowser->setWordWrapMode(QTextOption::NoWrap);   // 设置文本不自动换行
 
     connect(ui->operationMode_comboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(updateExecuteButtonState(int)));
 }
@@ -34,20 +37,20 @@ void Widget::on_readA_Button_clicked()
         return;
     }
 
+    ui->status_label->setText("正在加载矩阵A...");
     matrixA.loadFromFile(fileName);
     ui->matrixA_textBrowser->clear();
     QVector<QVector<double>> matrix = matrixA.getMatrix();
     for (const QVector<double> &row : matrix)
     {
+        QString line;
         for (int i = 0; i < row.size(); ++i)
         {
-            ui->matrixA_textBrowser->insertPlainText(QString::number(row[i]));
-            if (i != row.size() - 1)
-            {
-                ui->matrixA_textBrowser->insertPlainText(" ");
-            }
+            QString number = QString::number(row[i], 'f', 10); // 格式化为10位小数
+            QString paddedNumber = QString("%1").arg(number, 20, ' '); // 20字符宽，使用空格填充
+            line += paddedNumber;
         }
-        ui->matrixA_textBrowser->insertPlainText("\n");
+        ui->matrixA_textBrowser->append(line);
     }
 
     updateExecuteButtonState(ui->operationMode_comboBox->currentIndex());
@@ -72,20 +75,20 @@ void Widget::on_readB_Button_clicked()
         return;
     }
 
+    ui->status_label->setText("正在加载矩阵B...");
     matrixB.loadFromFile(fileName);
     ui->matrixB_textBrowser->clear();
     QVector<QVector<double>> matrix = matrixB.getMatrix();
     for (const QVector<double> &row : matrix)
     {
+        QString line;
         for (int i = 0; i < row.size(); ++i)
         {
-            ui->matrixB_textBrowser->insertPlainText(QString::number(row[i]));
-            if (i != row.size() - 1)
-            {
-                ui->matrixB_textBrowser->insertPlainText(" ");
-            }
+            QString number = QString::number(row[i], 'f', 10); // 格式化为10位小数
+            QString paddedNumber = QString("%1").arg(number, 20, ' '); // 20字符宽，使用空格填充
+            line += paddedNumber;
         }
-        ui->matrixB_textBrowser->insertPlainText("\n");
+        ui->matrixB_textBrowser->append(line);
     }
 
     updateExecuteButtonState(ui->operationMode_comboBox->currentIndex());
@@ -131,7 +134,7 @@ void Widget::on_execute_Button_clicked()
         // 判断能否相乘
         if (matrixA.getMatrix()[0].size() != matrixB.getMatrix().size())
         {
-            ui->status_label->setText("矩阵A和矩阵B不能相乘！");
+            ui->status_label->setText("矩阵A和矩阵B不能相乘！矩阵A：" + QString::number(matrixA.getMatrix().size()) + "x" + QString::number(matrixA.getMatrix()[0].size()) + "，矩阵B：" + QString::number(matrixB.getMatrix().size()) + "x" + QString::number(matrixB.getMatrix()[0].size()));
             return;
         }
         result = matrixA * matrixB;
@@ -150,15 +153,14 @@ void Widget::showResult(const Matrix &matrix)
     QVector<QVector<double>> m = matrix.getMatrix();
     for (const QVector<double> &row : m)
     {
+        QString line;
         for (int i = 0; i < row.size(); ++i)
         {
-            ui->result_textBrowser->insertPlainText(QString::number(row[i]));
-            if (i != row.size() - 1)
-            {
-                ui->result_textBrowser->insertPlainText(" ");
-            }
+            QString number = QString::number(row[i], 'f', 10); // 格式化为两位小数
+            QString paddedNumber = QString("%1").arg(number, 20, ' '); // 10字符宽，使用空格填充
+            line += paddedNumber;
         }
-        ui->result_textBrowser->insertPlainText("\n");
+        ui->result_textBrowser->append(line);
     }
 }
 
@@ -181,11 +183,14 @@ void Widget::on_save_Button_clicked()
     {
         for (int i = 0; i < row.size(); ++i)
         {
-            out << row[i];
-            if (i != row.size() - 1)
+            QString number = QString::number(row[i], 'f', 10); // 格式化为10位小数
+            if (i == 0)
             {
-                out << " ";
+                out << number;
+                continue;
             }
+            QString paddedNumber = QString("%1").arg(number, 20, ' '); // 20字符宽，使用空格填充
+            out << paddedNumber;
         }
         out << "\n";
     }

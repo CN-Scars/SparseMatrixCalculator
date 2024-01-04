@@ -28,7 +28,7 @@ public:
     QVector<Triple> toTriple() const; // 转换为三元组
     QVector<Triple> getTriple() const; // 获取三元组
     QVector<QVector<double>> getMatrix() const; // 获取矩阵
-    QVector<QVector<double>> getMatrixFromTriple(const QVector<Triple> &triple) const; // 从三元组中获取矩阵
+    QVector<QVector<double>> getMatrixFromTriple(const QVector<Triple> &triple, const int &rows, const int &columns) const; // 从三元组中获取矩阵
 
     void clear(); // 清空矩阵
 
