@@ -55,6 +55,9 @@ void Widget::on_readA_Button_clicked()
 
     updateExecuteButtonState(ui->operationMode_comboBox->currentIndex());
     ui->status_label->setText("加载矩阵A成功！");
+
+    // 输出矩阵A
+    qDebug() << "矩阵A：\n" << matrixA;
 }
 
 void Widget::on_clearA_Button_clicked()
@@ -93,6 +96,9 @@ void Widget::on_readB_Button_clicked()
 
     updateExecuteButtonState(ui->operationMode_comboBox->currentIndex());
     ui->status_label->setText("加载矩阵B成功！");
+
+    // 输出矩阵B
+    qDebug() << "矩阵B：\n" << matrixB;
 }
 
 void Widget::on_clearB_Button_clicked()
@@ -162,6 +168,8 @@ void Widget::showResult(const Matrix &matrix)
         }
         ui->result_textBrowser->append(line);
     }
+
+    qDebug() << "计算结果：\n" << matrix;
 }
 
 void Widget::on_save_Button_clicked()

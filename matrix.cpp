@@ -67,16 +67,7 @@ Matrix Matrix::operator+(const Matrix &rhs) const   // 采用三元组进行稀�
     }
 
     Matrix result;
-    int row = 0, column = 0;
-    for (const auto &t : tripleC)
-    {
-        if (t.row > row)
-            row = t.row;
-        if (t.column > column)
-            column = t.column;
-    }
-    ++row;
-    ++column;
+    int row = this->getRow(), column = this->getColumn();
 
     result.matrix = getMatrixFromTriple(tripleC, row, column);
     return result;
@@ -94,16 +85,7 @@ Matrix Matrix::operator-(const Matrix &rhs) const
 
     // 创建一个新的 Matrix 实例来调用加法运算符
     Matrix negatedMatrix;
-    int row = 0, column = 0;
-    for (const auto &t : negatedTripleB)
-    {
-        if (t.row > row)
-            row = t.row;
-        if (t.column > column)
-            column = t.column;
-    }
-    ++row;
-    ++column;
+    int row = this->getRow(), column = this->getColumn();
     negatedMatrix.matrix = getMatrixFromTriple(negatedTripleB, row, column);
 
     // 使用加法运算符来实现减法
@@ -143,16 +125,7 @@ Matrix Matrix::operator*(const Matrix &rhs) const
     }
 
     // 获取结果矩阵的行数和列数
-    int row = 0, column = 0;
-    for (const auto &t : tripleC)
-    {
-        if (t.row > row)
-            row = t.row;
-        if (t.column > column)
-            column = t.column;
-    }
-    ++row;
-    ++column;
+    int row = this->getRow(), column = rhs.getColumn();
 
     Matrix result;
     result.matrix = getMatrixFromTriple(tripleC, row, column);
@@ -198,6 +171,7 @@ void Matrix::loadFromFile(const QString &fileName)
         }
         matrix.append(row);
     }
+
     triple = toTriple();
     file.close();
 }
@@ -228,8 +202,20 @@ QVector<QVector<double> > Matrix::getMatrix() const
     return matrix;
 }
 
+int Matrix::getRow() const
+{
+    return matrix.size();
+}
+
+int Matrix::getColumn() const
+{
+    return matrix[0].size();
+}
+
 QVector<QVector<double>> Matrix::getMatrixFromTriple(const QVector<Triple> &triple, const int &rows, const int &columns) const
 {
+    qDebug() << rows << " " << columns;
+
     QVector<QVector<double>> matrix(rows, QVector<double>(columns, 0)); // 初始化为全零矩阵
 
     for (const Triple &t : triple)
