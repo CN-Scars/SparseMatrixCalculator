@@ -205,3 +205,11 @@ void Widget::on_save_Button_clicked()
     file.close();
     ui->status_label->setText("保存结果成功！");
 }
+
+void Widget::on_clearResult_pushButton_clicked()
+{
+    result.clear();
+    ui->result_textBrowser->clear();
+    ui->save_Button->setEnabled(false);
+    ui->status_label->setText("清除结果成功！");
+}

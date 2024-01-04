@@ -34,6 +34,8 @@ private slots:
 
     void on_save_Button_clicked();
 
+    void on_clearResult_pushButton_clicked();
+
 private:
     Matrix matrixA; // 矩阵A
     Matrix matrixB; // 矩阵B
