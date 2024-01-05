@@ -235,6 +235,8 @@ void Widget::on_save_Button_clicked()
         return;
     }
 
+    ui->status_label->setText("正在保存结果...");
+
     QTextStream out(&file);
     QVector<QVector<double>> m = result.getMatrix();
 
